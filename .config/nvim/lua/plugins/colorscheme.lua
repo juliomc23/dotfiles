@@ -22,12 +22,6 @@ return {
     },
   },
   {
-    -- Plugin for the Modus Themes
-    "miikanissi/modus-themes.nvim",
-    name = "modus",
-    priority = 1000, -- High priority to ensure it loads early
-  },
-  {
     -- Plugin for the Kanagawa color scheme
     "rebelot/kanagawa.nvim",
     name = "kanagawa",
@@ -62,31 +56,6 @@ return {
         }
       end,
     },
-  },
-  -- Plugin for the Rose Pine color scheme
-  { "rose-pine/neovim", name = "rose-pine" },
-  -- Plugin for the Oxocarbon color scheme
-  { "nyoom-engineering/oxocarbon.nvim", name = "oxocarbon" },
-  -- Plugin for the Lush color scheme with a dependency on Zenbones
-  { "rktjmp/lush.nvim", dependencies = { "mcchrish/zenbones.nvim" } },
-  {
-    -- Plugin for the Cyberdream color scheme
-    "scottmckendry/cyberdream.nvim",
-    lazy = false, -- Load this plugin immediately
-    priority = 1000, -- High priority to ensure it loads early
-  },
-  -- Plugin for the Doom One color scheme
-  { "NTBBloodbath/doom-one.nvim", name = "doom-one" },
-  -- Plugin for the Aylin color scheme
-  { "AhmedAbdulrahman/aylin.vim", name = "aylin" },
-  {
-    -- Plugin for enabling transparency
-    "xiyaowong/transparent.nvim",
-  },
-  {
-    -- Plugin for the Bamboo color scheme
-    "ribru17/bamboo.nvim",
-    lazy = false, -- Load this plugin immediately
   },
   {
     -- Plugin for the Oldworld color scheme
