@@ -5,3 +5,4 @@
 local keymap = vim.keymap
 keymap.set("n", "<Tab>", ":bn<CR>", { desc = "Jump to the next buffer" })
 keymap.set("n", "<S-Tab>", ":bp<CR>", { desc = "Jump to the previous buffer" })
+keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
