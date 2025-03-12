@@ -2,6 +2,15 @@
 
 My file configuration to work with nvim, zellij and zsh
 
+## First of all
+
+Update bash
+
+```bash
+sudo apt-get update
+sudo apt-get upgrade
+```
+
 ## Installation
 
 Follow these steps to get everything working
@@ -9,14 +18,16 @@ Follow these steps to get everything working
 ### 1.- Install Homebrew and run everything Homebrew
 
 ```bash
-/bin/bash -c “$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)”
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 ### 2. Add Hombrew to your shell configuration and restart your shell
 
 ```bash
 
-(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> ~/.bashrc
+echo >> /home/test/.bashrc
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/test/.bashrc
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 source .bashrc
 ```
@@ -30,15 +41,15 @@ sudo apt-get install build-essential
 ### 4.- Install this plugins
 
 ```bash
-brew install gcc fzf fd ripgrep zsh zsh-autosuggestions zsh-syntax-highlighting zellij eza starship zoxide
+brew install nvim gcc fzf fd ripgrep zsh zsh-autosuggestions zsh-syntax-highlighting zellij eza starship zoxide
 ```
 
 ### 5.- Add to /etc/shells zsh as your shell
 
 ```bash
-echo “$(which zsh)” | sudo tee -a /etc/shells
+echo "$(which zsh)" | sudo tee -a /etc/shells
 
-chs -s $(which zsh)
+chsh -s $(which zsh)
 ```
 
 ### 6.- Install Iosevka Term Nerd Font
