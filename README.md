@@ -57,5 +57,10 @@ chsh -s $(which zsh)
 ### 7.- Finally clone the repository and move the .config folders and the .zshrc file to your home directory which should be your home directory
 
 ```bash
+git clone https://github.com/juliomc23/dotfiles.git or git clone git@github.com:juliomc23/dotfiles.git
 mv dotfiles/.config dotfiles/.zshrc ./
+
+#move dotfiles/.wezterm.lua if you want to use wezterm
 ```
+
+### 8.- Restart your shell
