@@ -66,7 +66,15 @@ return {
           "mode", -- Display the current mode
         },
         lualine_b = { "branch" },
-        lualine_c = { "filename" },
+        lualine_c = {
+          {
+            "filename",
+            symbols = {
+              modified = "●", -- Mostrar cuando hay cambios sin guardar
+              readonly = "", -- Mostrar si el archivo es de solo lectura
+            },
+          },
+        },
         lualine_x = {},
         lualine_y = {},
         lualine_z = {},
