@@ -61,6 +61,28 @@ return {
         theme = "auto", -- Set the theme for lualine
         icons_enabled = true, -- Enable icons in the statusline
       },
+      extensions = {
+        {
+          filetypes = { "oil" },
+          sections = {
+            lualine_a = {
+              "mode",
+            },
+            lualine_b = {
+              function()
+                local ok, oil = pcall(require, "oil")
+                if not ok then
+                  return ""
+                end
+
+                ---@diagnostic disable-next-line: param-type-mismatch
+                local path = vim.fn.fnamemodify(oil.get_current_dir(), ":~")
+                return path .. " %m"
+              end,
+            },
+          },
+        },
+      },
       sections = {
         lualine_a = {
           "mode", -- Display the current mode
