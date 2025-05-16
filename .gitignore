@@ -21,3 +21,5 @@ code/
 github-copilot/
 .nvm/
 .zcompdump
+go/
+.config/go/
