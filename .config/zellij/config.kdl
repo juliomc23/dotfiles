@@ -294,9 +294,30 @@ themes {
     black "#181825" // Mantle
     white "#cdd6f4" // Text
   }
+  kanagawa-wave {
+    fg "#dcd7ba"
+    bg "#1f1f28"
+    black "#090618"
+    red "#c34043"
+    green "#76946a"
+    yellow "#c0a36e"
+    blue "#7e9cd8"
+    magenta "#957fb8"
+    cyan "#6a9589"
+    white "#c8c093"
+    orange "#ffa066"
+    light_black "#727169"
+    light_red "#e82424"
+    light_green "#98bb6c"
+    light_yellow "#e6c384"
+    light_blue "#7fb4ca"
+    light_magenta "#938aa9"
+    light_cyan "#7aa89f"
+    light_white "#dcd7ba"
+  }
 }
 
-theme "catppuccin-mocha"
+theme "kanagawa-wave"
 
 // Choose the base input mode of zellij.
 // Default: normal
@@ -315,7 +336,7 @@ default_mode "locked"
 // The name of the default layout to load on startup
 // Default: "work_oldWorld"
 // 
-default_layout "work"
+default_layout "work-wave"
  
 // The folder in which Zellij will look for layouts
 // (Requires restart)

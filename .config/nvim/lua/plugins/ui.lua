@@ -1,3 +1,28 @@
+local mode = {
+  "mode",
+  fmt = function(s)
+    local mode_map = {
+      ["NORMAL"] = "N",
+      ["O-PENDING"] = "N?",
+      ["INSERT"] = "I",
+      ["VISUAL"] = "V",
+      ["V-BLOCK"] = "VB",
+      ["V-LINE"] = "VL",
+      ["V-REPLACE"] = "VR",
+      ["REPLACE"] = "R",
+      ["COMMAND"] = "!",
+      ["SHELL"] = "SH",
+      ["TERMINAL"] = "T",
+      ["EX"] = "X",
+      ["S-BLOCK"] = "SB",
+      ["S-LINE"] = "SL",
+      ["SELECT"] = "S",
+      ["CONFIRM"] = "Y?",
+      ["MORE"] = "M",
+    }
+    return mode_map[s] or s
+  end,
+}
 return {
   { "folke/todo-comments.nvim", version = "*" },
   {
@@ -8,37 +33,6 @@ return {
       win = { border = "single" },
     },
   },
-  -- Plugin: noice.nvim
-  -- URL: https://github.com/folke/noice.nvim
-  -- Description: A Neovim plugin for enhancing the command-line UI.
-  {
-    "folke/noice.nvim",
-    config = function()
-      require("noice").setup({
-        cmdline = {
-          view = "cmdline", -- Use the cmdline view for the command-line
-        },
-        presets = {
-          bottom_search = true, -- Enable bottom search view
-          command_palette = true, -- Enable command palette view
-          lsp_doc_border = true, -- Enable LSP documentation border
-        },
-        -- Uncomment the following lines to customize the cmdline popup view
-        -- views = {
-        --   cmdline_popup = {
-        --     filter_options = {},
-        --     win_options = {
-        --       winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder",
-        --     },
-        --   },
-        -- },
-      })
-    end,
-  },
-
-  -- Plugin: nvim-docs-view
-  -- URL: https://github.com/amrbashir/nvim-docs-view
-  -- Description: A Neovim plugin for viewing documentation.
   {
     "amrbashir/nvim-docs-view",
     lazy = true, -- Load this plugin lazily
@@ -48,10 +42,6 @@ return {
       width = 60, -- Set the width of the documentation view
     },
   },
-
-  -- Plugin: lualine.nvim
-  -- URL: https://github.com/nvim-lualine/lualine.nvim
-  -- Description: A blazing fast and easy to configure Neovim statusline plugin.
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy", -- Load this plugin on the 'VeryLazy' event
@@ -62,11 +52,12 @@ return {
         icons_enabled = true, -- Enable icons in the statusline
       },
       extensions = {
+        "quickfix",
         {
           filetypes = { "oil" },
           sections = {
             lualine_a = {
-              "mode",
+              mode,
             },
             lualine_b = {
               function()
@@ -83,54 +74,17 @@ return {
           },
         },
       },
-      sections = {
-        lualine_a = {
-          "mode", -- Display the current mode
-        },
-        lualine_b = { "branch" },
-        lualine_c = {
-          {
-            "filename",
-            symbols = {
-              modified = "●", -- Mostrar cuando hay cambios sin guardar
-              readonly = "", -- Mostrar si el archivo es de solo lectura
-            },
-          },
-        },
-        lualine_x = {},
-        lualine_y = {},
-        lualine_z = {},
-      },
     },
-  },
-  -- Plugin: mini.nvim
-  -- URL: https://github.com/echasnovski/mini.nvim
-  -- Description: A collection of minimal, fast, and modular Lua plugins for Neovim.
-  {
-    "echasnovski/mini.nvim",
-    version = false, -- Use the latest version
-    config = function()
-      require("mini.animate").setup({
-        resize = {
-          enable = false, -- Disable resize animations
-        },
-        open = {
-          enable = false, -- Disable open animations
-        },
-        close = {
-          enable = false, -- Disable close animations
-        },
-        scroll = {
-          enable = false, -- Disable scroll animations
-        },
-      })
-    end,
   },
   {
     "folke/snacks.nvim",
     opts = {
       image = {},
       picker = {
+        exclude = {
+          ".git",
+          "node_modules",
+        },
         matcher = {
           fuzzy = true,
           smartcase = true,
@@ -138,15 +92,15 @@ return {
           filename_bonus = true,
         },
         sources = {
-          explorer = {
-            matcher = {
-              fuzzy = true, -- Enables fuzzy matching, so you can be a bit imprecise with your search terms
-              smartcase = true, -- If your search term has uppercase letters, the search becomes case-sensitive
-              ignorecase = true, -- Ignores case when searching, unless smartcase is triggered
-              filename_bonus = true, -- Gives a higher priority to matches in filenames
-              sort_empty = false, -- If no matches are found, it won't sort the results
-            },
-          },
+          -- explorer = {
+          --   matcher = {
+          --     fuzzy = true, -- Enables fuzzy matching, so you can be a bit imprecise with your search terms
+          --     smartcase = true, -- If your search term has uppercase letters, the search becomes case-sensitive
+          --     ignorecase = true, -- Ignores case when searching, unless smartcase is triggered
+          --     filename_bonus = true, -- Gives a higher priority to matches in filenames
+          --     sort_empty = false, -- If no matches are found, it won't sort the results
+          --   },
+          -- },
         },
       },
       dashboard = {

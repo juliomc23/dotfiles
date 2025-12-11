@@ -1,25 +1,69 @@
-.angular-config.json
+# --- Carpetas con credenciales o datos sensibles ---
 .aws/
 .azure/
+.ssh/
+.dotnet/
+.wget-hsts
+
+# --- Directorios de caché, runtime y cosas que NO deben subirse ---
+.cache/
+.npm/
+.node-gyp/
+.bun/
+.go-build/
+.atuin/
+.codeium/
+.landscape/
+.nvm/
 .bash_history
 .bash_logout
-.bun/
-.cache/
-.codeium/
-.docker/
+.motd_shown
+.profile
+.sudo_as_admin_successful
+.zcompdump
+.viminfo
+
+# --- Git-related ---
 .git/
 .gitconfig
-.landscape/
-.local/
-.motd_shown
-.npm/
-.profile
-.ssh/
-.sudo_as_admin_successful
-.tmux/
+
+# --- Herramientas (no config, solo runtime/cache) ---
+.docker/
+.fastfetch_logo
+fastfetch_logo.txt
+
+# --- Config que no quieres versionar ---
+.config/nvim.bak/
+.config/fastfetch/
+.config/atuin/
+.config/opencode/
+.config/yazi/
+
+# --- Archivos de logs o temporales ---
+*.log
+*.tmp
+*.swp
+*.swo
+
+# --- Cosas específicas que listaste ---
+.go/
 code/
 github-copilot/
-.nvm/
-.zcompdump
-go/
-.config/go/
+
+# Angular
+.angular-config.json
+
+# Credenciales o datos sensibles
+.aws/
+.azure/
+
+# Google Gemini cache
+.gemini/
+
+# Archivos locales del sistema (runtime)
+.local/
+
+# Tmux runtime (no tu configuración principal)
+.tmux/
+# --- Permitir TODO lo demás en ~/.config ---
+!/.config/
