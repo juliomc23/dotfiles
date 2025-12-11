@@ -34,10 +34,10 @@ fastfetch_logo.txt
 
 # --- Config que no quieres versionar ---
 .config/nvim.bak/
-.config/fastfetch/
-.config/atuin/
+# .config/fastfetch/
+.config/atuin/atuin-receipt.json
 .config/opencode/
-.config/yazi/
+.config/yazi/flavors/
 
 # --- Archivos de logs o temporales ---
 *.log
