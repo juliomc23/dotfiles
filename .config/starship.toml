@@ -6,7 +6,7 @@ $line_break\
 $character"""
 
 add_newline = true
-palette = 'kanagawa_wave'
+palette = 'catppuccin_mocha'
 
 [directory]
 style = 'bold fg:blue'
