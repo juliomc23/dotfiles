@@ -21,8 +21,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 # Atuin
-source "$HOME/.atuin/bin/env"
-eval "$(atuin init zsh)"
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh)"
+fi
 
 
 # ==========================
