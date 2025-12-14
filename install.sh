@@ -26,10 +26,6 @@ is_wsl() {
   grep -qi "microsoft" /proc/version 2>/dev/null
 }
 
-# -------------------------
-# Inicio
-# -------------------------
-
 log "Instalación de entorno (Ubuntu/WSL)"
 
 if is_wsl; then
@@ -38,18 +34,13 @@ else
   log "Entorno detectado: Ubuntu"
 fi
 
-# Dependencias básicas
-if ! command -v git >/dev/null 2>&1; then
-  warn "git no está instalado. Instalando git..."
-  sudo apt update
-  sudo apt install -y git
-fi
+# -------------------------
+# Dependencias básicas de sistema
+# -------------------------
 
-if ! command -v curl >/dev/null 2>&1; then
-  warn "curl no está instalado. Instalando curl..."
-  sudo apt update
-  sudo apt install -y curl
-fi
+log "Instalando dependencias de sistema (git, curl, build-essential)..."
+sudo apt update
+sudo apt install -y git curl build-essential
 
 # -------------------------
 # Homebrew en Linux
@@ -73,10 +64,6 @@ else
   fi
 fi
 
-# -------------------------
-# Paquetes con Homebrew
-# -------------------------
-
 log "Actualizando Homebrew..."
 brew update
 
@@ -95,17 +82,12 @@ brew install \
   zsh-vi-mode \
   lazygit
 
-# -------------------------
-# Dotfiles (.config, .zshrc, .tmux.conf)
-# -------------------------
-
 log "Instalando dotfiles desde ${REPO_DIR}"
 
 # .config → ~/.config
 if [ -d "${REPO_DIR}/.config" ]; then
   log "Procesando carpeta .config/"
   mkdir -p "${HOME}/.config"
-  # copia todo el contenido de .config del repo a ~/.config
   find "${REPO_DIR}/.config" -mindepth 1 -maxdepth 1 -print0 | while IFS= read -r -d '' item; do
     name="$(basename "${item}")"
     dest="${HOME}/.config/${name}"
@@ -127,10 +109,7 @@ if [ -f "${REPO_DIR}/.tmux.conf" ]; then
   backup_and_copy "${REPO_DIR}/.tmux.conf" "${HOME}/.tmux.conf"
 fi
 
-# -------------------------
 # Asegurar Homebrew en zsh
-# -------------------------
-
 BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"
 if [ -n "${BREW_PREFIX}" ]; then
   SHELLENV_LINE="eval \"\$(${BREW_PREFIX}/bin/brew shellenv)\""
@@ -150,16 +129,12 @@ if [ -n "${BREW_PREFIX}" ]; then
     printf '\n%s\n' "${SHELLENV_LINE}" >>"${HOME}/.zshrc"
   fi
 fi
-#
-# -------------------------
-# Cambiar shell por defecto a zsh
-# -------------------------
 
+# Cambiar shell por defecto a zsh
 if command -v zsh >/dev/null 2>&1; then
   ZSH_PATH="$(command -v zsh)"
   CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7 || echo "")"
 
-  # Asegurarse de que ZSH_PATH está en /etc/shells
   if ! grep -Fxq "${ZSH_PATH}" /etc/shells 2>/dev/null; then
     log "Añadiendo ${ZSH_PATH} a /etc/shells"
     echo "${ZSH_PATH}" | sudo tee -a /etc/shells >/dev/null
@@ -175,4 +150,4 @@ else
   warn "zsh no está instalado correctamente."
 fi
 
-log "Instalación completada. Cierra y abre la terminal para aplicar todos los cambios."
+log "Instalación completada."
