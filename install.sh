@@ -68,6 +68,7 @@ log "Actualizando Homebrew..."
 brew update
 
 log "Instalando herramientas con Homebrew..."
+log "Instalando herramientas con Homebrew..."
 brew install \
   zsh \
   neovim \
@@ -80,7 +81,12 @@ brew install \
   zsh-syntax-highlighting \
   zsh-autosuggestions \
   zsh-vi-mode \
-  lazygit
+  lazygit \
+  starship \
+  gcc \
+  fzf \
+  fd \
+  ripgrep
 
 log "Instalando dotfiles desde ${REPO_DIR}"
 
@@ -128,6 +134,16 @@ if [ -n "${BREW_PREFIX}" ]; then
     log "Añadiendo Homebrew al entorno en ~/.zshrc"
     printf '\n%s\n' "${SHELLENV_LINE}" >>"${HOME}/.zshrc"
   fi
+fi
+
+# -------------------------
+# Tmux Plugin Manager (TPM)
+# -------------------------
+if [ ! -d "${HOME}/.tmux/plugins/tpm" ]; then
+  log "Instalando Tmux Plugin Manager (TPM)..."
+  git clone https://github.com/tmux-plugins/tpm "${HOME}/.tmux/plugins/tpm"
+else
+  log "TPM ya está instalado en ~/.tmux/plugins/tpm"
 fi
 
 # Cambiar shell por defecto a zsh
