@@ -1,19 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="${HOME}/dotfiles"
-BACKUP_DIR="${HOME}/dotfiles_backup/$(date +'%Y-%m-%d-%H%M%S')"
-CONFIG_SOURCE="${REPO_DIR}/.config"
-ZSH_SOURCE="${REPO_DIR}/.zshrc"
-
-# -------------------------
-# Helpers
-# -------------------------
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_DIR="${HOME}/dotfiles_backup/$(date +'%Y-%m-%d-%H%M%S')}"
 
 log() { printf "\n[+] %s\n" "$*"; }
 warn() { printf "\n[!] %s\n" "$*" >&2; }
 
-backup_and_link() {
+backup_and_copy() {
   local src="$1"
   local dest="$2"
 
@@ -24,8 +18,8 @@ backup_and_link() {
   fi
 
   mkdir -p "$(dirname "${dest}")"
-  ln -s "${src}" "${dest}"
-  log "Enlace creado: ${dest} -> ${src}"
+  log "Copiando ${src} -> ${dest}"
+  cp -r "${src}" "${dest}"
 }
 
 is_wsl() {
@@ -33,11 +27,18 @@ is_wsl() {
 }
 
 # -------------------------
-# Comprobaciones iniciales
+# Inicio
 # -------------------------
 
-log "Inicio de bootstrap para dotfiles"
+log "Instalación de entorno (Ubuntu/WSL)"
 
+if is_wsl; then
+  log "Entorno detectado: WSL (Ubuntu)"
+else
+  log "Entorno detectado: Ubuntu"
+fi
+
+# Dependencias básicas
 if ! command -v git >/dev/null 2>&1; then
   warn "git no está instalado. Instalando git..."
   sudo apt update
@@ -50,27 +51,14 @@ if ! command -v curl >/dev/null 2>&1; then
   sudo apt install -y curl
 fi
 
-if [ ! -d "${REPO_DIR}" ]; then
-  warn "El repositorio ${REPO_DIR} no existe."
-  warn "Clónalo con: git clone https://github.com/juliomc23/dotfiles.git \"${REPO_DIR}\""
-  exit 1
-fi
-
-if is_wsl; then
-  log "Entorno detectado: WSL sobre Windows"
-else
-  log "Entorno detectado: Ubuntu (no WSL)"
-fi
-
 # -------------------------
-# Homebrew para Linux
+# Homebrew en Linux
 # -------------------------
 
 if ! command -v brew >/dev/null 2>&1; then
   log "Homebrew no encontrado. Instalando Homebrew para Linux..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-  # Añadir brew al entorno actual
   if [ -d "/home/linuxbrew/.linuxbrew" ]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   elif [ -d "${HOME}/.linuxbrew" ]; then
@@ -78,18 +66,15 @@ if ! command -v brew >/dev/null 2>&1; then
   fi
 else
   log "Homebrew ya está instalado."
-  # Asegurar que brew está en el entorno actual
-  if command -v brew >/dev/null 2>&1; then
-    if [ -d "/home/linuxbrew/.linuxbrew" ]; then
-      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    elif [ -d "${HOME}/.linuxbrew" ]; then
-      eval "$(${HOME}/.linuxbrew/bin/brew shellenv)"
-    fi
+  if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  elif [ -d "${HOME}/.linuxbrew" ]; then
+    eval "$(${HOME}/.linuxbrew/bin/brew shellenv)"
   fi
 fi
 
 # -------------------------
-# Paquetes con brew
+# Paquetes con Homebrew
 # -------------------------
 
 log "Actualizando Homebrew..."
@@ -97,54 +82,58 @@ brew update
 
 log "Instalando herramientas con Homebrew..."
 brew install \
-  neovim \
-  tmux \
-  zellij \
-  yazi \
-  atuin \
-  lazygit \
-  fastfetch \
-  eza \
-  zoxide \
-  starship \
   zsh \
-  zsh-autosuggestions \
+  neovim \
+  zellij \
+  tmux \
+  zoxide \
+  eza \
+  atuin \
+  yazi \
   zsh-syntax-highlighting \
-  zsh-vi-mode
+  zsh-autosuggestions \
+  zsh-vi-mode \
+  lazygit \
+  homebrew-core
 
 # -------------------------
-# Enlaces de configuración
+# Dotfiles (.config, .zshrc, .tmux.conf)
 # -------------------------
 
-log "Creando enlaces simbólicos de configuración..."
+log "Instalando dotfiles desde ${REPO_DIR}"
 
-# .config completo (carpeta)
-if [ -d "${CONFIG_SOURCE}" ]; then
-  # Recorre todo lo que haya dentro de .config del repo
-  find "${CONFIG_SOURCE}" -maxdepth 1 -mindepth 1 -print0 | while IFS= read -r -d '' item; do
+# .config → ~/.config
+if [ -d "${REPO_DIR}/.config" ]; then
+  log "Procesando carpeta .config/"
+  mkdir -p "${HOME}/.config"
+  # copia todo el contenido de .config del repo a ~/.config
+  find "${REPO_DIR}/.config" -mindepth 1 -maxdepth 1 -print0 | while IFS= read -r -d '' item; do
     name="$(basename "${item}")"
     dest="${HOME}/.config/${name}"
-    backup_and_link "${item}" "${dest}"
+    backup_and_copy "${item}" "${dest}"
   done
 else
-  warn "No se encontró ${CONFIG_SOURCE}. Omite enlace de .config."
+  warn "No se encontró ${REPO_DIR}/.config, se omite."
 fi
 
-# .zshrc
-if [ -f "${ZSH_SOURCE}" ]; then
-  backup_and_link "${ZSH_SOURCE}" "${HOME}/.zshrc"
+# .zshrc → ~/.zshrc
+if [ -f "${REPO_DIR}/.zshrc" ]; then
+  backup_and_copy "${REPO_DIR}/.zshrc" "${HOME}/.zshrc"
 else
-  warn "No se encontró ${ZSH_SOURCE}. Omite enlace de .zshrc."
+  warn "No se encontró ${REPO_DIR}/.zshrc, se omite."
+fi
+
+# .tmux.conf → ~/.tmux.conf
+if [ -f "${REPO_DIR}/.tmux.conf" ]; then
+  backup_and_copy "${REPO_DIR}/.tmux.conf" "${HOME}/.tmux.conf"
 fi
 
 # -------------------------
-# Asegurar brew en la shell
+# Asegurar Homebrew en zsh
 # -------------------------
 
 BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"
-
 if [ -n "${BREW_PREFIX}" ]; then
-  # Añade el shellenv de brew a .zprofile/.zshrc si no existe
   SHELLENV_LINE="eval \"\$(${BREW_PREFIX}/bin/brew shellenv)\""
 
   if [ -f "${HOME}/.zprofile" ]; then
@@ -178,8 +167,7 @@ if command -v zsh >/dev/null 2>&1; then
     log "zsh ya es la shell por defecto."
   fi
 else
-  warn "zsh no se encontró en el sistema después de la instalación."
+  warn "zsh no está instalado correctamente."
 fi
 
-log "Bootstrap completado. Cierra y abre la terminal (o sesión) para aplicar todos los cambios."
-
+log "Instalación completada. Cierra y abre la terminal para aplicar todos los cambios."
