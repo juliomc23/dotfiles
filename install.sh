@@ -93,8 +93,7 @@ brew install \
   zsh-syntax-highlighting \
   zsh-autosuggestions \
   zsh-vi-mode \
-  lazygit \
-  homebrew-core
+  lazygit
 
 # -------------------------
 # Dotfiles (.config, .zshrc, .tmux.conf)
