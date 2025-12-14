@@ -150,14 +150,20 @@ if [ -n "${BREW_PREFIX}" ]; then
     printf '\n%s\n' "${SHELLENV_LINE}" >>"${HOME}/.zshrc"
   fi
 fi
-
+#
 # -------------------------
 # Cambiar shell por defecto a zsh
 # -------------------------
 
 if command -v zsh >/dev/null 2>&1; then
-  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7 || echo "")"
   ZSH_PATH="$(command -v zsh)"
+  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7 || echo "")"
+
+  # Asegurarse de que ZSH_PATH está en /etc/shells
+  if ! grep -Fxq "${ZSH_PATH}" /etc/shells 2>/dev/null; then
+    log "Añadiendo ${ZSH_PATH} a /etc/shells"
+    echo "${ZSH_PATH}" | sudo tee -a /etc/shells >/dev/null
+  fi
 
   if [ "${CURRENT_SHELL}" != "${ZSH_PATH}" ]; then
     log "Cambiando shell por defecto a zsh para el usuario ${USER}"
