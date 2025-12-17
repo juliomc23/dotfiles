@@ -1,6 +1,10 @@
 # Dotfiles
 
-Mi configuración personal para desarrollo.
+Configuración personal de desarrollo **portable, reproducible e idempotente** basada en **symlinks**.
+
+Pensada para mover todo el flujo de trabajo a cualquier PC (Linux / WSL) sin perder configuración.
+
+---
 
 ## 🚀 Instalación rápida
 
@@ -10,92 +14,121 @@ cd ~/.dotfiles
 ./install.sh
 ```
 
+📌 El script:
+
+* Instala dependencias
+* Crea **enlaces simbólicos** (no copias)
+* Hace **backup automático** si existen configs previas
+* Es **re-ejecutable** sin romper nada
+
+---
+
+## 🧠 Filosofía
+
+* ❌ Nada de copias → **symlinks**
+* ❌ Nada de Oh My Zsh (bloat)
+* ✅ Zsh limpio + plugins explícitos
+* ✅ Homebrew solo en `.zprofile`
+* ✅ Un solo script (`install.sh`)
+
+---
+
 ## 📦 Incluye
 
-- **Zsh** con Oh My Zsh - shell moderno
-- **Starship** - prompt personalizado
-- **Eza** - ls moderno con colores
-- **Zoxide** - cd inteligente
-- **Yazi** - file manager terminal
-- **Atuin** - historial de comandos mejorado
-- **Neovim** - editor con configuración LazyVim
-- **Tmux** - multiplexor de terminal
-- **Zellij** - workspace moderno
-- **LazyGit** - interfaz git visual
-- **Fastfetch** - información del sistema
-- **Bun** - runtime JavaScript/TypeScript
-- **NVM** - gestor de Node.js
+### Shell & Prompt
 
-## 🔧 Instalación manual
+* **Zsh** (Homebrew)
+* **Starship** (prompt)
+* **zsh-autosuggestions**
+* **zsh-syntax-highlighting**
+* **zsh-vi-mode**
 
-Si prefieres instalar paso a paso:
+### Terminal workflow
 
-### 1. Clonar repositorio
-```bash
-git clone https://github.com/juliomc23/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
+* **Tmux** + TPM (Plugin Manager)
+* **Catppuccin** (via TPM)
+* **Zoxide** (cd inteligente)
+* **Atuin** (historial avanzado)
+* **Eza** (ls moderno)
+* **Yazi** (file manager)
+* **LazyGit** (Git TUI)
+
+### Dev tools
+
+* **Neovim** (config en `.config/nvim`)
+* **fzf**, **fd**, **ripgrep**
+* **gcc / build-essential**
+
+⚠️ **WezTerm NO se instala automáticamente**
+
+* Solo se crea el symlink a `~/.wezterm.lua`
+* La instalación se hace manualmente (empresa / PowerShell)
+
+---
+
+## 📁 Estructura del repo
+
+```text
+.dotfiles/
+├── .config/
+│   ├── nvim/
+│   ├── yazi/
+│   ├── atuin/
+│   ├── lazygit/
+│   └── ...
+├── .tmux.conf
+├── .zshrc
+├── .wezterm.lua
+├── install.sh
+└── README.md
 ```
 
-### 2. Instalar dependencias
+---
 
-**Ubuntu/Debian:**
-```bash
-# Instalar Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+## 🔧 Qué hace exactamente `install.sh`
 
-# Instalar dependencias del sistema
-sudo apt update
-sudo apt install build-essential curl file git
+* Detecta Ubuntu / WSL
+* Instala dependencias del sistema
+* Instala Homebrew (Linux)
+* Instala herramientas con Homebrew
+* Crea **symlinks seguros** (con backup previo)
+* Configura Homebrew en `.zprofile`
+* Instala **TPM** (Tmux Plugin Manager)
+* Cambia la shell por defecto a **zsh (brew)**
 
-# Instalar paquetes
-brew install zsh tmux neovim starship zellij yazi atuin lazygit fastfetch eza zoxide zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode
+Backups se guardan en:
 
-# Instalar herramientas adicionales
-curl -fsSL https://bun.sh/install | bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+```text
+~/dotfiles_backup/YYYY-MM-DD-HHMMSS/
 ```
 
-**macOS:**
-```bash
-brew install zsh tmux neovim starship zellij yazi atuin lazygit fastfetch eza zoxide zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode
+---
 
-# Instalar herramientas adicionales
-curl -fsSL https://bun.sh/install | bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-```
+## 🎨 Tmux + Catppuccin (IMPORTANTE)
 
-### 3. Crear enlaces simbólicos
-```bash
-ln -sf ~/.dotfiles/.zshrc ~/.zshrc
-ln -sf ~/.dotfiles/.tmux.conf ~/.tmux.conf
-ln -sf ~/.dotfiles/.config/nvim ~/.config/nvim
-ln -sf ~/.dotfiles/.config/zellij ~/.config/zellij
-ln -sf ~/.dotfiles/.config/yazi ~/.config/yazi
-ln -sf ~/.dotfiles/.config/atuin ~/.config/atuin
-ln -sf ~/.dotfiles/.config/lazygit ~/.config/lazygit
-ln -sf ~/.dotfiles/.config/fastfetch ~/.config/fastfetch
-ln -sf ~/.dotfiles/.config/starship.toml ~/.config/starship.toml
-```
+Después de instalar en un PC nuevo:
 
-## 🐛 Solución de problemas
+1. Abre tmux:
 
-### Error: comando no encontrado
-Asegúrate de que los binarios estén en tu PATH:
-```bash
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
-```
+   ```bash
+   tmux
+   ```
 
-### Neovim no encuentra plugins
-Ejecuta dentro de Neovim:
-```vim
-:Lazy sync
-```
+2. Instala los plugins (una sola vez):
 
-### Zsh no es el shell por defecto
-```bash
-chsh -s $(which zsh)
-```
+   ```text
+   Ctrl + b  →  Shift + I
+   ```
+
+3. Recarga la config:
+
+   ```text
+   Ctrl + b  →  r
+   ```
+
+👉 **Sin esto, Catppuccin NO se cargará** (es comportamiento normal de tmux).
+
+---
 
 ## 🔄 Actualizar configuración
 
@@ -104,3 +137,44 @@ cd ~/.dotfiles
 git pull
 ./install.sh
 ```
+
+Los cambios se reflejan automáticamente gracias a los **symlinks**.
+
+---
+
+## 🐛 Troubleshooting
+
+### Tmux no carga el theme
+
+* Asegúrate de haber ejecutado `Ctrl+b + I`
+* Verifica que existen plugins en `~/.tmux/plugins/`
+
+### Cambios en dotfiles no se reflejan
+
+* Verifica que el archivo es un **symlink**:
+
+  ```bash
+  ls -l ~/.zshrc
+  ```
+
+### Zsh no es la shell por defecto
+
+```bash
+chsh -s $(brew --prefix)/bin/zsh
+```
+
+---
+
+## 📌 Notas finales
+
+Este repo está pensado para:
+
+* Devs que usan **tmux + nvim**
+* Entornos corporativos (WSL / restricciones)
+* Reproducibilidad sin magia
+
+Si algo se rompe, **el script no borra nada**, siempre hace backup primero.
+
+---
+
+🚀 *Clona, ejecuta y sigue trabajando como en tu máquina principal.*
