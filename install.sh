@@ -1,32 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# =========================================================
+# Paths
+# =========================================================
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="${HOME}/dotfiles_backup/$(date +'%Y-%m-%d-%H%M%S')}"
+TIMESTAMP="$(date +'%Y-%m-%d-%H%M%S')"
+BACKUP_DIR="${HOME}/dotfiles_backup/${TIMESTAMP}"
 
 log() { printf "\n[+] %s\n" "$*"; }
 warn() { printf "\n[!] %s\n" "$*" >&2; }
 
-backup_and_copy() {
-  local src="$1"
-  local dest="$2"
-
-  if [ -e "${dest}" ] || [ -L "${dest}" ]; then
-    mkdir -p "${BACKUP_DIR}"
-    log "Backup de ${dest} -> ${BACKUP_DIR}"
-    mv "${dest}" "${BACKUP_DIR}/"
-  fi
-
-  mkdir -p "$(dirname "${dest}")"
-  log "Copiando ${src} -> ${dest}"
-  cp -r "${src}" "${dest}"
-}
-
+# =========================================================
+# Utils
+# =========================================================
 is_wsl() {
   grep -qi "microsoft" /proc/version 2>/dev/null
 }
 
-log "Instalación de entorno (Ubuntu/WSL)"
+backup() {
+  mkdir -p "${BACKUP_DIR}"
+  mv "$1" "${BACKUP_DIR}/"
+}
+
+link() {
+  local src="$1"
+  local dest="$2"
+
+  if [ -L "${dest}" ]; then
+    if [ "$(readlink "${dest}")" = "${src}" ]; then
+      log "Symlink correcto: ${dest}"
+      return
+    else
+      log "Symlink incorrecto, moviendo a backup: ${dest}"
+      backup "${dest}"
+    fi
+  elif [ -e "${dest}" ]; then
+    log "Archivo existente, moviendo a backup: ${dest}"
+    backup "${dest}"
+  fi
+
+  mkdir -p "$(dirname "${dest}")"
+  ln -s "${src}" "${dest}"
+  log "Symlink creado: ${dest} → ${src}"
+}
+
+# =========================================================
+# Detect OS
+# =========================================================
+log "Detectando entorno..."
 
 if is_wsl; then
   log "Entorno detectado: WSL (Ubuntu)"
@@ -34,136 +56,132 @@ else
   log "Entorno detectado: Ubuntu"
 fi
 
-# -------------------------
-# Dependencias básicas de sistema
-# -------------------------
-
-log "Instalando dependencias de sistema (git, curl, build-essential)..."
+# =========================================================
+# System dependencies
+# =========================================================
+log "Instalando dependencias básicas del sistema..."
 sudo apt update
-sudo apt install -y git curl build-essential
+sudo apt install -y --no-install-recommends \
+  git \
+  curl \
+  build-essential
 
-# -------------------------
-# Homebrew en Linux
-# -------------------------
-
+# =========================================================
+# Homebrew (Linux)
+# =========================================================
 if ! command -v brew >/dev/null 2>&1; then
-  log "Homebrew no encontrado. Instalando Homebrew para Linux..."
+  log "Homebrew no encontrado. Instalando..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-  if [ -d "/home/linuxbrew/.linuxbrew" ]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  elif [ -d "${HOME}/.linuxbrew" ]; then
-    eval "$(${HOME}/.linuxbrew/bin/brew shellenv)"
-  fi
-else
-  log "Homebrew ya está instalado."
-  if [ -d "/home/linuxbrew/.linuxbrew" ]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  elif [ -d "${HOME}/.linuxbrew" ]; then
-    eval "$(${HOME}/.linuxbrew/bin/brew shellenv)"
-  fi
 fi
+
+if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+  BREW_PREFIX="/home/linuxbrew/.linuxbrew"
+elif [ -d "${HOME}/.linuxbrew" ]; then
+  BREW_PREFIX="${HOME}/.linuxbrew"
+else
+  warn "No se pudo detectar Homebrew prefix"
+  exit 1
+fi
+
+eval "$(${BREW_PREFIX}/bin/brew shellenv)"
 
 log "Actualizando Homebrew..."
 brew update
 
+# =========================================================
+# Packages
+# =========================================================
 log "Instalando herramientas con Homebrew..."
-log "Instalando herramientas con Homebrew..."
+
 brew install \
   zsh \
   neovim \
-  zellij \
   tmux \
   zoxide \
   eza \
   atuin \
   yazi \
-  zsh-syntax-highlighting \
-  zsh-autosuggestions \
-  zsh-vi-mode \
   lazygit \
   starship \
-  gcc \
   fzf \
   fd \
-  ripgrep
+  ripgrep \
+  gcc \
+  opencode \
+  zsh-autosuggestions \
+  zsh-syntax-highlighting \
+  zsh-vi-mode
 
-log "Instalando dotfiles desde ${REPO_DIR}"
+# =========================================================
+# Dotfiles (symlinks)
+# =========================================================
+log "Instalando dotfiles (symlinks)..."
 
-# .config → ~/.config
+# .config/*
 if [ -d "${REPO_DIR}/.config" ]; then
-  log "Procesando carpeta .config/"
-  mkdir -p "${HOME}/.config"
-  find "${REPO_DIR}/.config" -mindepth 1 -maxdepth 1 -print0 | while IFS= read -r -d '' item; do
-    name="$(basename "${item}")"
-    dest="${HOME}/.config/${name}"
-    backup_and_copy "${item}" "${dest}"
-  done
+  find "${REPO_DIR}/.config" -mindepth 1 -maxdepth 1 -print0 |
+    while IFS= read -r -d '' item; do
+      name="$(basename "${item}")"
+      link "${item}" "${HOME}/.config/${name}"
+    done
 else
-  warn "No se encontró ${REPO_DIR}/.config, se omite."
+  warn "No existe .config en el repo"
 fi
 
-# .zshrc → ~/.zshrc
-if [ -f "${REPO_DIR}/.zshrc" ]; then
-  backup_and_copy "${REPO_DIR}/.zshrc" "${HOME}/.zshrc"
-else
-  warn "No se encontró ${REPO_DIR}/.zshrc, se omite."
+# ~/.zshrc
+[ -f "${REPO_DIR}/.zshrc" ] && link "${REPO_DIR}/.zshrc" "${HOME}/.zshrc"
+
+# ~/.tmux.conf
+[ -f "${REPO_DIR}/.tmux.conf" ] && link "${REPO_DIR}/.tmux.conf" "${HOME}/.tmux.conf"
+
+# ~/.wezterm.lua (solo link, no instalación)
+[ -f "${REPO_DIR}/.wezterm.lua" ] && link "${REPO_DIR}/.wezterm.lua" "${HOME}/.wezterm.lua"
+
+# =========================================================
+# Zprofile (Homebrew env)
+# =========================================================
+ZPROFILE="${HOME}/.zprofile"
+BREW_LINE="eval \"\$(${BREW_PREFIX}/bin/brew shellenv)\""
+
+if [ ! -f "${ZPROFILE}" ] || ! grep -Fq "${BREW_LINE}" "${ZPROFILE}"; then
+  log "Configurando Homebrew en ~/.zprofile"
+  printf '\n%s\n' "${BREW_LINE}" >>"${ZPROFILE}"
 fi
 
-# .tmux.conf → ~/.tmux.conf
-if [ -f "${REPO_DIR}/.tmux.conf" ]; then
-  backup_and_copy "${REPO_DIR}/.tmux.conf" "${HOME}/.tmux.conf"
-fi
+# =========================================================
+# Tmux Plugin Manager
+# =========================================================
+TPM_DIR="${HOME}/.tmux/plugins/tpm"
 
-# Asegurar Homebrew en zsh
-BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"
-if [ -n "${BREW_PREFIX}" ]; then
-  SHELLENV_LINE="eval \"\$(${BREW_PREFIX}/bin/brew shellenv)\""
-
-  if [ -f "${HOME}/.zprofile" ]; then
-    if ! grep -Fq "${SHELLENV_LINE}" "${HOME}/.zprofile"; then
-      log "Añadiendo Homebrew al entorno en ~/.zprofile"
-      printf '\n%s\n' "${SHELLENV_LINE}" >>"${HOME}/.zprofile"
-    fi
-  else
-    log "Creando ~/.zprofile con configuración de Homebrew"
-    printf '%s\n' "${SHELLENV_LINE}" >"${HOME}/.zprofile"
-  fi
-
-  if [ -f "${HOME}/.zshrc" ] && ! grep -Fq "${SHELLENV_LINE}" "${HOME}/.zshrc"; then
-    log "Añadiendo Homebrew al entorno en ~/.zshrc"
-    printf '\n%s\n' "${SHELLENV_LINE}" >>"${HOME}/.zshrc"
-  fi
-fi
-
-# -------------------------
-# Tmux Plugin Manager (TPM)
-# -------------------------
-if [ ! -d "${HOME}/.tmux/plugins/tpm" ]; then
+if [ ! -d "${TPM_DIR}" ]; then
   log "Instalando Tmux Plugin Manager (TPM)..."
-  git clone https://github.com/tmux-plugins/tpm "${HOME}/.tmux/plugins/tpm"
+  git clone https://github.com/tmux-plugins/tpm "${TPM_DIR}"
 else
-  log "TPM ya está instalado en ~/.tmux/plugins/tpm"
+  log "TPM ya está instalado"
 fi
 
-# Cambiar shell por defecto a zsh
-if command -v zsh >/dev/null 2>&1; then
-  ZSH_PATH="$(command -v zsh)"
-  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7 || echo "")"
+# =========================================================
+# Default shell → Zsh (brew)
+# =========================================================
+ZSH_PATH="${BREW_PREFIX}/bin/zsh"
 
-  if ! grep -Fxq "${ZSH_PATH}" /etc/shells 2>/dev/null; then
+if [ -x "${ZSH_PATH}" ]; then
+  if ! grep -Fxq "${ZSH_PATH}" /etc/shells; then
     log "Añadiendo ${ZSH_PATH} a /etc/shells"
     echo "${ZSH_PATH}" | sudo tee -a /etc/shells >/dev/null
   fi
 
+  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7 || true)"
+
   if [ "${CURRENT_SHELL}" != "${ZSH_PATH}" ]; then
-    log "Cambiando shell por defecto a zsh para el usuario ${USER}"
-    chsh -s "${ZSH_PATH}" || warn "No se pudo cambiar la shell por defecto. Hazlo manualmente con: chsh -s \"${ZSH_PATH}\""
+    log "Cambiando shell por defecto a zsh"
+    chsh -s "${ZSH_PATH}" || warn "No se pudo cambiar la shell automáticamente"
   else
-    log "zsh ya es la shell por defecto."
+    log "zsh ya es la shell por defecto"
   fi
 else
-  warn "zsh no está instalado correctamente."
+  warn "zsh no encontrado en ${ZSH_PATH}"
 fi
 
-log "Instalación completada."
+log "Instalación completada correctamente 🎉"
+log "Reinicia la sesión o ejecuta: exec zsh"
