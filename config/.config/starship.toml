@@ -1,16 +1,16 @@
 format = """
 $directory\
-[ ](lavender)\
-$git_branch\
-$git_status\
+$git_branch$git_status\
+$docker_context\
+$line_break\
 $character"""
 
 add_newline = true
 palette = 'catppuccin_mocha'
 
 [directory]
-style = 'bold fg:crust bg:lavender'
-format = '[ $path ]($style)'
+style = 'bold fg:blue'
+format = '[$path]($style)'
 truncation_length = 3
 truncation_symbol = '…/'
 truncate_to_repo = false
@@ -18,48 +18,47 @@ truncate_to_repo = false
 [git_branch]
 style = 'fg:green'
 symbol = ''
-format = 'on [$symbol $branch]($style)'
+format = ' [$symbol $branch]($style)'
 
 [git_status]
-style = 'fg:green'
-format = '[ $all_status$ahead_behind ]($style)'
+style = 'fg:yellow'
+format = '[ $all_status$ahead_behind]($style)'
+
+[docker_context]
+style = 'fg:teal'
+format = ' [$symbol $context]($style)'
 
 [character]
-disabled = true
-success_symbol = '[❯](bold fg:sky)'
+success_symbol = '[❯](bold fg:yellow)'
 error_symbol = '[❯](bold fg:red)'
-vimcmd_symbol = '[❮](bold fg:sky)'
-vimcmd_replace_one_symbol = '[❮](bold fg:lavender)'
-vimcmd_replace_symbol = '[❮](bold fg:lavender)'
-vimcmd_visual_symbol = '[❮](bold fg:yellow)'
 
 [palettes.catppuccin_mocha]
-rosewater = "#f5e0dc"
-flamingo = "#f2cdcd"
-pink = "#f5c2e7"
-mauve = "#cba6f7"
-red = "#f38ba8"
-maroon = "#eba0ac"
-peach = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-teal = "#94e2d5"
-sky = "#89dceb"
-sapphire = "#74c7ec"
-blue = "#89b4fa"
-lavender = "#b4befe"
-text = "#cdd6f4"
-subtext1 = "#bac2de"
-subtext0 = "#a6adc8"
-overlay2 = "#9399b2"
-overlay1 = "#7f849c"
-overlay0 = "#6c7086"
-surface2 = "#585b70"
-surface1 = "#45475a"
-surface0 = "#313244"
-base = "#1e1e2e"
-mantle = "#181825"
-crust = "#11111b"
+rosewater = '#f5e0dc'
+flamingo = '#f2cdcd'
+pink = '#f5c2e7'
+mauve = '#cba6f7'
+red = '#f38ba8'
+maroon = '#eba0ac'
+peach = '#fab387'
+yellow = '#f9e2af'
+green = '#a6e3a1'
+teal = '#94e2d5'
+sky = '#89dceb'
+sapphire = '#74c7ec'
+blue = '#89b4fa'
+lavender = '#b4befe'
+text = '#cdd6f4'
+subtext_1 = '#bac2de'
+subtext_0 = '#9399b2'
+overlay_2 = '#9399b2'
+overlay_1 = '#7f849c'
+overlay_0 = '#6c7086'
+surface_2 = '#585b70'
+surface_1 = '#45475a'
+surface_0 = '#313244'
+base = '#1e1e2e'
+mantle = '#181825'
+crust = '#11111b'
 
 [palettes.kanagawa_wave]
 text = "#DCD7BA"
