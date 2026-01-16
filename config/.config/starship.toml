@@ -1,32 +1,29 @@
 format = """
 $directory\
-$git_branch$git_status\
-$docker_context\
-$line_break\
-$character"""
+$git_branch\
+$git_status\
+\n$character\
+"""
 
-add_newline = true
 palette = 'catppuccin_mocha'
 
 [directory]
 style = 'bold fg:blue'
 format = '[$path]($style)'
-truncation_length = 3
-truncation_symbol = '…/'
+truncation_length = 1
 truncate_to_repo = false
 
 [git_branch]
-style = 'fg:green'
+style = 'fg:text'
 symbol = ''
-format = ' [$symbol $branch]($style)'
+format = ' git:[$branch]($style)'
 
 [git_status]
 style = 'fg:yellow'
-format = '[ $all_status$ahead_behind]($style)'
+format = '[$all_status$ahead_behind]($style)'
 
-[docker_context]
-style = 'fg:teal'
-format = ' [$symbol $context]($style)'
+[fill]
+symbol = ' '
 
 [character]
 success_symbol = '[❯](bold fg:green)'
