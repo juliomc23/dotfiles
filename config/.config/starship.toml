@@ -10,13 +10,14 @@ palette = 'catppuccin_mocha'
 [directory]
 style = 'bold fg:blue'
 format = '[$path]($style)'
+truncation_symbol = "../"
 truncation_length = 1
 truncate_to_repo = false
 
 [git_branch]
 style = 'fg:text'
 symbol = ''
-format = ' git:[$branch]($style)'
+format = ' git:[$branch]($style) '
 
 [git_status]
 style = 'fg:yellow'
